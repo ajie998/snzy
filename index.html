@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>十年之约</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background-image: 
+                linear-gradient(rgba(50, 50, 50, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(50, 50, 50, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, rgba(25, 55, 109, 0.2) 0%, rgba(25, 55, 109, 0) 70%);
+            background-size: 20px 20px, 20px 20px, 100% 100%;
+            background-position: center;
+            position: relative;
+            animation: backgroundMove 20s linear infinite;
+        }
+        
+        @keyframes backgroundMove {
+            0% {
+                background-position: 0 0, 0 0, center;
+            }
+            100% {
+                background-position: 20px 20px, 20px 20px, center;
+            }
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                rgba(25, 55, 109, 0.2) 0%,
+                rgba(25, 55, 109, 0) 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        * {
+            color: #fff;
+        }
+        
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px rgba(0, 150, 255, 0.5),
+                            0 0 10px rgba(0, 150, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(0, 150, 255, 0.8),
+                            0 0 30px rgba(0, 150, 255, 0.5);
+            }
+            100% {
+                box-shadow: 0 0 5px rgba(0, 150, 255, 0.5),
+                            0 0 10px rgba(0, 150, 255, 0.3);
+            }
+        }
+        
+        button, input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            animation: glow 2s infinite;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 添加内容背景透明度 */
+        #dropZone, .progress-container, #results, .footer {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        
+        h1 {
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(120deg, #1a73e8, #34a853, #fbbc05, #ea4335);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 8s ease infinite;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1a73e8, #34a853);
+            animation: underline 3s ease-in-out infinite;
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        @keyframes underline {
+            0% {
+                width: 0;
+                opacity: 0;
+            }
+            50% {
+                width: 100px;
+                opacity: 1;
+            }
+            100% {
+                width: 0;
+                opacity: 0;
+            }
+        }
+        
+        #dropZone {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(26, 115, 232, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        #dropZone.dragover {
+            background: #e8f0fe;
+            border-color: #1a73e8;
+            transform: scale(1.02);
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .upload-text {
+            color: #5f6368;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        /* 新的进度条样式 */
+        .progress-container {
+            margin: 20px 0;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        #progress {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e8f0fe;
+            margin: 10px 0;
+            overflow: hidden;
+            -webkit-appearance: none;
+        }
+        
+        #progress::-webkit-progress-bar {
+            background: #e8f0fe;
+            border-radius: 4px;
+        }
+        
+        #progress::-webkit-progress-value {
+            background: linear-gradient(to right, #1a73e8, #4285f4);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        #stats {
+            text-align: center;
+            color: #5f6368;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        #downloadBtn {
+            display: none;
+            background: linear-gradient(45deg, #1a73e8, #34a853);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            box-shadow: 0 2px 10px rgba(26, 115, 232, 0.3);
+            animation: fadeIn 0.5s ease;
+            width: fit-content;
+        }
+        
+        #downloadBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(26, 115, 232, 0.4);
+        }
+        
+        #downloadBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 8px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .result-item {
+            background: #f8f9fa;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .result-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .result-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .fullscreen-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        
+        .fullscreen-view img {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px 0;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            color: #5f6368;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .footer a {
+            color: #1a73e8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+        
+        .footer a:hover {
+            background: #e8f0fe;
+            color: #1557b0;
+            text-decoration: none;
+        }
+        
+        .footer-divider {
+            display: inline-block;
+            margin: 0 10px;
+            color: #dadce0;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+            padding: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-size: 16px;
+            color: #fff;
+        }
+        
+        #processedCount, #totalCount {
+            font-weight: bold;
+            color: #1a73e8;
+        }
+        
+        .progress-bar {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-size: 16px;
+            color: #fff;
+        }
+        
+        #processedCount, #totalCount {
+            font-weight: bold;
+            color: #1a73e8;
+        }
+        
+        /* 添加提示框样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: linear-gradient(45deg, #1a73e8, #34a853);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <h1>十年之约</h1>
+    <div id="dropZone">
+        <p class="upload-text">将图片、文件夹或压缩包拖放到这里</p>
+        <p class="upload-text">或</p>
+        <input type="file" id="fileInput" multiple accept="image/*,.zip" style="display: none;">
+        <button onclick="document.getElementById('fileInput').click()">选择文件</button>
+    </div>
+    
+    <div style="text-align: center; margin: 20px 0;">
+        <label style="color: white; margin-right: 10px;">选择重构方案：</label>
+        <select id="processMethod" style="
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        ">
+            <option value="transform">画面变换(推荐)</option>
+            <option value="color">色彩调整</option>
+            <option value="composite">组合优化</option>
+            <option value="advanced">高级原创优化</option>
+        </select>
+    </div>
+
+    <div class="progress-container">
+        <progress id="progress" value="0" max="100"></progress>
+        <div class="divider">
+            已处理: <span id="processedCount">0</span> / <span id="totalCount">0</span>
+        </div>
+        <button id="downloadBtn" onclick="downloadImages()" style="
+            display: none;
+            background: linear-gradient(45deg, #1a73e8, #34a853);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 2px 10px rgba(26, 115, 232, 0.3);">
+            下载处理后的图片
+        </button>
+    </div>
+    
+    <div id="results"></div>
+
+    <div class="footer">
+        © 2024 图片重建工具 
+        <span class="footer-divider">|</span> 
+        QQ: <a href="tencent://message/?uin=879365639" target="_blank">879365639</a>
+    </div>
+
+    <script>
+        // 确保在页面加载完成后立即添加事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            const methodSelect = document.getElementById('processMethod');
+            
+            // 添加选择器变化监听
+            methodSelect.addEventListener('change', function(e) {
+                if (e.target.value === 'text') {
+                    // 创建弹窗
+                    const watermarkDialog = document.createElement('div');
+                    watermarkDialog.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(255, 255, 255, 0.95);
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                        z-index: 1000;
+                    `;
+                    
+                    watermarkDialog.innerHTML = `
+                        <h3 style="margin: 0 0 15px 0; color: #333;">设置水印</h3>
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" id="watermarkTextInput" placeholder="请输入水印文字" style="
+                                width: 200px;
+                                padding: 8px;
+                                border: 1px solid #ddd;
+                                border-radius: 4px;
+                                margin-bottom: 10px;
+                                display: block;
+                            ">
+                            <div style="display: flex; align-items: center;">
+                                <label style="color: #333; margin-right: 10px;">透明度:</label>
+                                <input type="range" id="watermarkOpacityInput" min="1" max="100" value="10" style="flex: 1;">
+                                <span id="opacityValue" style="color: #333; margin-left: 10px;">10%</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <button onclick="this.parentElement.parentElement.remove()" style="
+                                padding: 6px 12px;
+                                margin-right: 10px;
+                                border: none;
+                                border-radius: 4px;
+                                background: #f0f0f0;
+                                cursor: pointer;
+                            ">取消</button>
+                            <button id="confirmWatermark" style="
+                                padding: 6px 12px;
+                                border: none;
+                                border-radius: 4px;
+                                background: #1a73e8;
+                                color: white;
+                                cursor: pointer;
+                            ">确定</button>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(watermarkDialog);
+                    
+                    // 添加透明度滑块事件
+                    const opacityInput = document.getElementById('watermarkOpacityInput');
+                    const opacityValue = document.getElementById('opacityValue');
+                    opacityInput.addEventListener('input', function() {
+                        opacityValue.textContent = this.value + '%';
+                    });
+                    
+                    // 添加确认按钮事件
+                    document.getElementById('confirmWatermark').addEventListener('click', function() {
+                        const text = document.getElementById('watermarkTextInput').value;
+                        const opacity = document.getElementById('watermarkOpacityInput').value;
+                        
+                        // 存储水印设置
+                        window.watermarkSettings = {
+                            text: text || '默认水印',
+                            opacity: opacity
+                        };
+                        
+                        watermarkDialog.remove();
+                    });
+                }
+            });
+        });
+
+        const worker = new Worker(URL.createObjectURL(new Blob([`
+            self.onmessage = async function(e) {
+                const { imageData, threshold, fileName, method } = e.data;
+                
+                function processImage(imageData, method) {
+                    const data = imageData.data;
+                    const width = imageData.width;
+                    const height = imageData.height;
+                    const tempData = new Uint8ClampedArray(data);
+                    
+                    switch(method) {
+                        case 'transform':
+                            // 画面变换方案：裁剪、移位、缩放
+                            const scale = 0.98 + Math.random() * 0.04; // 0.98-1.02的缩放
+                            const offsetX = Math.floor(Math.random() * 4) - 2; // -2到2像素的偏移
+                            const offsetY = Math.floor(Math.random() * 4) - 2;
+                            
+                            for (let y = 0; y < height; y++) {
+                                for (let x = 0; x < width; x++) {
+                                    // 计算源坐标
+                                    const sourceX = Math.min(Math.max(0, Math.round(x * scale + offsetX)), width - 1);
+                                    const sourceY = Math.min(Math.max(0, Math.round(y * scale + offsetY)), height - 1);
+                                    
+                                    const targetIdx = (y * width + x) * 4;
+                                    const sourceIdx = (sourceY * width + sourceX) * 4;
+                                    
+                                    // 复制像素值
+                                    for (let i = 0; i < 4; i++) {
+                                        data[targetIdx + i] = tempData[sourceIdx + i];
+                                    }
+                                }
+                            }
+                            break;
+                            
+                        case 'color':
+                            // 色彩调整方案
+                            const brightness = 1 + (Math.random() - 0.5) * 0.04; // ±2%亮度变化
+                            const contrast = 1 + (Math.random() - 0.5) * 0.02;  // ±1%对比度变化
+                            const hueShift = (Math.random() - 0.5) * 2;        // 细微色相偏移
+                            
+                            for (let i = 0; i < data.length; i += 4) {
+                                // 应用亮度和对比度
+                                for (let j = 0; j < 3; j++) {
+                                    let value = data[i + j];
+                                    value = ((value - 128) * contrast + 128) * brightness;
+                                    data[i + j] = Math.min(255, Math.max(0, value));
+                                }
+                                
+                                // 应用色相偏移
+                                if (i % 16 === 0) { // 降低处理频率
+                                    const r = data[i];
+                                    data[i] = Math.min(255, Math.max(0, r + hueShift));
+                                }
+                            }
+                            break;
+                            
+                        case 'composite':
+                            // 组合优化方案：结合多种方法
+                            // 1. 微小几何变换
+                            const jitter = Math.random() * 2 - 1;
+                            // 2. 细微色彩调整
+                            const colorTweak = 1 + (Math.random() - 0.5) * 0.02;
+                            // 3. 局部细节增强
+                            
+                            for (let y = 1; y < height - 1; y++) {
+                                for (let x = 1; x < width - 1; x++) {
+                                    const idx = (y * width + x) * 4;
+                                    
+                                    // 应用组合效果
+                                    for (let i = 0; i < 3; i++) {
+                                        let value = data[idx + i];
+                                        // 添加抖动
+                                        value += jitter;
+                                        // 调整色彩
+                                        value *= colorTweak;
+                                        // 确保值在有效范围内
+                                        data[idx + i] = Math.min(255, Math.max(0, value));
+                                    }
+                                }
+                            }
+                            break;
+                            
+                        case 'advanced':
+                            // 高级原创优化方案
+                            // 1. 微小几何变形
+                            const deformStrength = 0.3 + Math.random() * 0.2;
+                            const waveFreq = 0.01 + Math.random() * 0.01;
+                            
+                            // 2. 创建临时缓冲区
+                            const tempBuffer = new Uint8ClampedArray(data);
+                            
+                            for (let y = 0; y < height; y++) {
+                                for (let x = 0; x < width; x++) {
+                                    const idx = (y * width + x) * 4;
+                                    
+                                    // 应用非线性变形
+                                    const offsetX = Math.sin(y * waveFreq) * deformStrength;
+                                    const offsetY = Math.cos(x * waveFreq) * deformStrength;
+                                    
+                                    const sourceX = Math.min(Math.max(0, Math.round(x + offsetX)), width - 1);
+                                    const sourceY = Math.min(Math.max(0, Math.round(y + offsetY)), height - 1);
+                                    const sourceIdx = (sourceY * width + sourceX) * 4;
+                                    
+                                    // 3. 添加微小噪声和纹理
+                                    for (let i = 0; i < 3; i++) {
+                                        let value = tempBuffer[sourceIdx + i];
+                                        
+                                        // 添加高频细节
+                                        if (Math.random() > 0.997) {
+                                            value += (Math.random() - 0.5) * 2;
+                                        }
+                                        
+                                        // 局部对比度增强
+                                        const localContrast = 1 + (Math.random() - 0.5) * 0.02;
+                                        value = 128 + (value - 128) * localContrast;
+                                        
+                                        // 4. 细微色彩调整
+                                        const colorShift = Math.sin(x * 0.01 + y * 0.01) * 0.5;
+                                        value += colorShift;
+                                        
+                                        // 5. 添加随机像素偏移
+                                        if (Math.random() > 0.999) {
+                                            const pixelShift = Math.random() > 0.5 ? 1 : -1;
+                                            value += pixelShift;
+                                        }
+                                        
+                                        // 6. 应用边缘增强
+                                        if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
+                                            const neighbors = [
+                                                tempBuffer[((y-1) * width + x) * 4 + i],
+                                                tempBuffer[((y+1) * width + x) * 4 + i],
+                                                tempBuffer[(y * width + x-1) * 4 + i],
+                                                tempBuffer[(y * width + x+1) * 4 + i]
+                                            ];
+                                            const avgNeighbor = neighbors.reduce((a, b) => a + b, 0) / 4;
+                                            const edgeEnhance = (value - avgNeighbor) * 0.1;
+                                            value += edgeEnhance;
+                                        }
+                                        
+                                        // 确保值在有效范围内
+                                        data[idx + i] = Math.min(255, Math.max(0, Math.round(value)));
+                                    }
+                                    
+                                    // 保持透明度
+                                    data[idx + 3] = tempBuffer[sourceIdx + 3];
+                                }
+                            }
+                            
+                            // 7. 最终的全局调整
+                            const finalAdjustment = 1 + (Math.random() - 0.5) * 0.01;
+                            for (let i = 0; i < data.length; i += 4) {
+                                for (let j = 0; j < 3; j++) {
+                                    data[i + j] = Math.min(255, Math.max(0, 
+                                        Math.round(data[i + j] * finalAdjustment)
+                                    ));
+                                }
+                            }
+                            break;
+                    }
+                    
+                    return imageData;
+                }
+
+                const processed = processImage(imageData, method);
+                self.postMessage({ processed, fileName });
+            };
+        `], { type: 'application/javascript' })));
+
+        // 主要处理函数
+        async function processFiles(files) {
+            // 清除之前的处理结果
+            document.getElementById('results').innerHTML = '';
+            processedImages = []; // 清空之前存储的图片数据
+            document.getElementById('downloadBtn').style.display = 'none'; // 隐藏下载按钮
+            
+            const allFiles = [];
+            document.getElementById('totalCount').textContent = '处理中...';
+            document.getElementById('processedCount').textContent = '0';
+            document.getElementById('progress').value = 0;
+            
+            // 处理文件夹和zip的函数
+            async function processEntry(entry) {
+                return new Promise((resolve) => {
+                    if (entry.isFile) {
+                        entry.file(file => {
+                            if (file.type.startsWith('image/') || 
+                                /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name)) {
+                                allFiles.push(file);
+                            }
+                            resolve();
+                        });
+                    } else if (entry.isDirectory) {
+                        const reader = entry.createReader();
+                        reader.readEntries(async entries => {
+                            const promises = entries.map(entry => processEntry(entry));
+                            await Promise.all(promises);
+                            resolve();
+                        });
+                    } else {
+                        resolve();
+                    }
+                });
+            }
+
+            // 处理ZIP文件
+            async function processZip(file) {
+                try {
+                    const zip = await JSZip.loadAsync(file);
+                    for (const [filename, zipEntry] of Object.entries(zip.files)) {
+                        if (!zipEntry.dir && /\.(jpg|jpeg|png|gif|webp)$/i.test(filename)) {
+                            const blob = await zipEntry.async('blob');
+                            allFiles.push(new File([blob], filename, { 
+                                type: 'image/' + filename.split('.').pop().toLowerCase() 
+                            }));
+                        }
+                    }
+                } catch (error) {
+                    console.error('处理ZIP文件时出错:', error);
+                }
+            }
+
+            // 处理所有输入文件
+            for (const file of files) {
+                if (file.name.toLowerCase().endsWith('.zip')) {
+                    await processZip(file);
+                } else if (file.type.startsWith('image/') || 
+                          /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name)) {
+                    allFiles.push(file);
+                }
+            }
+
+            // 更新总数并开始处理
+            const totalFiles = allFiles.length;
+            document.getElementById('totalCount').textContent = totalFiles;
+            let processedCount = 0;
+
+            // 处理收集到的图片
+            for (const file of allFiles) {
+                const img = await createImageBitmap(file);
+                const canvas = new OffscreenCanvas(img.width, img.height);
+                const ctx = canvas.getContext('2d');
+                
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0);
+                
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                worker.postMessage({
+                    imageData,
+                    threshold: 60,
+                    fileName: file.name,
+                    method: document.getElementById('processMethod').value
+                });
+
+                processedCount++;
+                document.getElementById('processedCount').textContent = processedCount;
+                document.getElementById('progress').value = (processedCount/totalFiles) * 100;
+            }
+        }
+
+        // 修改拖放处理
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        
+        // 处理拖拽悬停
+        dropZone.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('dragover');
+        });
+
+        // 处理文件拖放
+        dropZone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('dragover');
+            
+            const items = e.dataTransfer.items;
+            const files = [];
+
+            // 处理文件夹函数
+            async function processDirectory(entry) {
+                return new Promise((resolve) => {
+                    const dirReader = entry.createReader();
+                    const readEntries = () => {
+                        dirReader.readEntries(async (entries) => {
+                            if (entries.length === 0) {
+                                resolve();
+                            } else {
+                                const promises = entries.map(async (entry) => {
+                                    if (entry.isFile) {
+                                        return new Promise((resolve) => {
+                                            entry.file((file) => {
+                                                if (file.type.startsWith('image/') || 
+                                                    /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name)) {
+                                                    files.push(file);
+                                                }
+                                                resolve();
+                                            });
+                                        });
+                                    } else if (entry.isDirectory) {
+                                        return processDirectory(entry);
+                                    }
+                                });
+                                await Promise.all(promises);
+                                readEntries(); // 继续读取剩余条目
+                            }
+                        });
+                    };
+                    readEntries();
+                });
+            }
+
+            try {
+                if (items) {
+                    const promises = [];
+                    for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        if (item.kind === 'file') {
+                            const entry = item.webkitGetAsEntry() || item.getAsEntry();
+                            if (entry) {
+                                if (entry.isDirectory) {
+                                    promises.push(processDirectory(entry));
+                                } else {
+                                    const file = item.getAsFile();
+                                    if (file) {
+                                        files.push(file);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    await Promise.all(promises);
+                }
+
+                // 处理收集到的文件
+                if (files.length > 0) {
+                    await processFiles(files);
+                } else {
+                    // 如果没有找到文件，尝试使用传统方式
+                    const directFiles = Array.from(e.dataTransfer.files);
+                    if (directFiles.length > 0) {
+                        await processFiles(directFiles);
+                    }
+                }
+            } catch (error) {
+                console.error('处理拖放文件时出错:', error);
+                alert('处理文件时出错，请重试');
+            }
+        });
+
+        // 处理文件选择
+        fileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            await processFiles(files);
+            // 重置文件输入，允许选择相同文件
+            fileInput.value = '';
+        });
+
+        let processedImages = []; // 存储处理后的图片
+        
+        worker.onmessage = function(e) {
+            const { processed, fileName } = e.data;
+            const canvas = document.createElement('canvas');
+            canvas.width = processed.width;
+            canvas.height = processed.height;
+            const ctx = canvas.getContext('2d');
+            ctx.putImageData(processed, 0, 0);
+
+            const imageUrl = canvas.toDataURL('image/jpeg', 0.92);
+            
+            // 显示结果
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result-item';
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            
+            // 修改点击放大功能
+            img.onclick = function(e) {
+                e.stopPropagation(); // 阻止事件冒泡
+                
+                // 移除已存在的全屏显示
+                const existingFullscreen = document.querySelector('.fullscreen-view');
+                if (existingFullscreen) {
+                    document.body.removeChild(existingFullscreen);
+                }
+                
+                // 创建新的全屏显示
+                const fullscreenDiv = document.createElement('div');
+                fullscreenDiv.className = 'fullscreen-view';
+                const fullscreenImg = document.createElement('img');
+                fullscreenImg.src = this.src;
+                fullscreenDiv.appendChild(fullscreenImg);
+                
+                // 点击关闭全屏
+                fullscreenDiv.onclick = function() {
+                    document.body.removeChild(this);
+                };
+                
+                document.body.appendChild(fullscreenDiv);
+            };
+            
+            resultDiv.appendChild(img);
+            document.getElementById('results').appendChild(resultDiv);
+            
+            // 存储处理后的图片数据
+            processedImages.push({
+                data: imageUrl,
+                name: fileName
+            });
+            
+            // 更新计数显示
+            document.getElementById('processedCount').textContent = processedImages.length;
+            
+            // 检查是否所有图片都处理完成
+            if (processedImages.length === parseInt(document.getElementById('totalCount').textContent)) {
+                // 显示完成提示
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = '任务完成！';
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.classList.add('show'), 100);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => document.body.removeChild(notification), 300);
+                }, 3000);
+
+                // 显示下载按钮
+                const downloadBtn = document.getElementById('downloadBtn');
+                downloadBtn.style.display = 'block';
+                downloadBtn.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+        
+        // 添加下载函数
+        async function downloadImages() {
+            const btn = document.getElementById('downloadBtn');
+            btn.disabled = true;
+            btn.textContent = '正在打包...';
+            
+            try {
+                const zip = new JSZip();
+                
+                // 使用原始文件名添加图片到压缩包
+                processedImages.forEach((img) => {
+                    const imageData = img.data.split(',')[1];
+                    // 确保文件名正确
+                    const fileName = img.name || `processed_${Date.now()}.jpg`;
+                    zip.file(fileName, imageData, {base64: true});
+                });
+                
+                // 生成压缩包
+                const content = await zip.generateAsync({type: 'blob'});
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = 'processed_images.zip';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+            } catch (error) {
+                console.error('下载出错:', error);
+                alert('下载失败，请重试');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '下载处理后的图片';
+            }
+        }
+    </script>
+</body>
+</html>
